@@ -1,7 +1,43 @@
 import idlogo from "../assets/idlogo.png";
 import authimg from "../assets/authimg.png";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { auth } from "../../firebase";
+import { login } from "../features/userSlice";
 const Signup = () => {
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const register = (e) => {
+    e.preventDefault();
+    if (!name) {
+      return alert("Please Enter a Full Name!");
+    } else {
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((user) => {
+          updateProfile(user.user, {
+            displayName: name,
+          }).then(() => {
+            dispatch(
+              login({
+                email: user.user.email,
+                uid: user.user.uid,
+                displayName: name,
+              })
+            );
+            navigate("/home");
+          });
+        })
+        .catch((err) => alert(err));
+    }
+  };
   return (
     <div className="flex h-screen w-full bg-black">
       <div
@@ -30,30 +66,35 @@ const Signup = () => {
         <p className="my-8 text-white font-inter font-extrabold text-lg">
           -OR-
         </p>
-        <form className="flex flex-col gap-4">
+        <form onSubmit={register} className="flex flex-col gap-4">
           <input
             type="text"
             placeholder="Full Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             className="pl-2 focus:outline-none text-white bg-black border-b-2 border-b-slate-400 font-inter"
           />
           <input
             type="email"
+            value={email}
             placeholder="Email Address"
+            onChange={(e) => setEmail(e.target.value)}
             className="pl-2 text-white bg-black focus:outline-none border-b-2 border-b-slate-400 font-inter"
           />
           <input
             type="password"
+            value={password}
             placeholder="Your Password"
+            onChange={(e) => setPassword(e.target.value)}
             className="pl-2 text-white bg-black border-b-2 focus:outline-none border-b-slate-400 font-inter"
           />
-          <Link to={"/home"}>
-            <button
-              type="submit"
-              className="w-full text-white font-inter bg-teal-600 py-2 font-bold rounded-md"
-            >
-              Create Account
-            </button>
-          </Link>
+
+          <button
+            type="submit"
+            className="w-full text-white font-inter bg-teal-600 py-2 font-bold rounded-md"
+          >
+            Create Account
+          </button>
         </form>
         <p className="text-white font-inter mt-2">
           Already have an Account?

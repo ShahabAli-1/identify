@@ -1,7 +1,35 @@
 import idlogo from "../assets/idlogo.png";
 import authimg from "../assets/authimg.png";
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { auth } from "../../firebase";
+import { signInWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { login } from "../features/userSlice";
+
 const SignIn = () => {
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const loginToApp = (e) => {
+    e.preventDefault();
+    signInWithEmailAndPassword(auth, email, password)
+      .then((user) => {
+        dispatch(
+          login({
+            email: user.user.email,
+            uid: user.user.uid,
+            displayName: user.user.displayName,
+          })
+        );
+        navigate("/home");
+      })
+      .catch((err) => alert(err));
+  };
+
   return (
     <div className="flex h-screen w-full bg-black">
       <div
@@ -30,25 +58,27 @@ const SignIn = () => {
         <p className="my-8 text-white font-inter font-extrabold text-lg">
           -OR-
         </p>
-        <form className="flex flex-col gap-4">
+        <form onSubmit={loginToApp} className="flex flex-col gap-4">
           <input
             type="email"
             placeholder="Email Address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="pl-2 bg-black border-b-2 focus:outline-none border-b-slate-400 font-inter text-white"
           />
           <input
             type="password"
             placeholder="Your Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="pl-2 bg-black border-b-2 focus:outline-none border-b-slate-400 font-inter text-white"
           />
-          <Link to={"/home"}>
-            <button
-              type="submit"
-              className="w-full text-white font-inter bg-teal-600 py-2 font-bold rounded-md"
-            >
-              Create Account
-            </button>
-          </Link>
+          <button
+            type="submit"
+            className="w-full text-white font-inter bg-teal-600 py-2 font-bold rounded-md"
+          >
+            Login
+          </button>
         </form>
         <p className="text-white font-inter mt-2">
           Dont have an Account?

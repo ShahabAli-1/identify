@@ -14,7 +14,15 @@ import easy from "../assets/easy.png";
 import secure from "../assets/secure.png";
 import convenient from "../assets/convenient.png";
 import twofour from "../assets/twofour.png";
+import { useSelector } from "react-redux";
+import { selectUser } from "../features/userSlice";
+import { redirect } from "react-router-dom";
 const Home = () => {
+  const user = useSelector(selectUser);
+  console.log(user);
+  if (!user) {
+    return redirect("/signin");
+  }
   return (
     <div className="pb-20">
       <div className="bg-black w-full h-full px-10">
